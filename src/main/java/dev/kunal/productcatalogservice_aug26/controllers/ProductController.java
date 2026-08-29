@@ -1,16 +1,19 @@
 package dev.kunal.productcatalogservice_aug26.controllers;
 
 import dev.kunal.productcatalogservice_aug26.dtos.CategoryDto;
+import dev.kunal.productcatalogservice_aug26.dtos.FakeStoreProductDto;
 import dev.kunal.productcatalogservice_aug26.dtos.ProductDto;
 import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import dev.kunal.productcatalogservice_aug26.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -22,7 +25,7 @@ public class ProductController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-//    public ProductController(IProductService productService) {
+//    public ProductController(@Qualifier("storageProductService") IProductService productService) {
 //        this.productService = productService;
 //    }
 
@@ -43,6 +46,17 @@ public class ProductController {
         ProductDto productDto = mapProductToProductDto(product);
         return ResponseEntity.ok(productDto);
         // return new ResponseEntity<>(productDto,HttpStatus.OK);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
+
+        List<Product> products = productService.getAllProducts();
+        List<ProductDto> productDtos = products.stream()
+                .map(this::mapProductToProductDto)
+                .toList();
+
+        return new ResponseEntity<>(productDtos, HttpStatus.OK);
     }
 
     //POST
