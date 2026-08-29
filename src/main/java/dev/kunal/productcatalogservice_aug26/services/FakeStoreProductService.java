@@ -17,7 +17,9 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -108,6 +110,24 @@ public class FakeStoreProductService implements IProductService {
         RestTemplate restTemplate = restTemplateBuilder.build();
         restTemplate.delete("https://fakestoreapi.com/products/{id}", id);
 
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+
+        RestTemplate restTemplate = restTemplateBuilder.build();
+
+        ResponseEntity<FakeStoreProductDto[]> responseEntity =
+                restTemplate.getForEntity("https://fakestoreapi.com/products",
+                        FakeStoreProductDto[].class
+                );
+
+        List<Product> products = new ArrayList<>();
+        for(FakeStoreProductDto fakeStoreProductDto : responseEntity.getBody()){
+            products.add(mapFakeStoreProductDtoToProduct(fakeStoreProductDto));
+        }
+
+        return products;
     }
 
     public <T> ResponseEntity<T> requestForEntity(String url, HttpMethod httpMethod, @Nullable Object request,
