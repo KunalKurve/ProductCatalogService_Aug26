@@ -13,7 +13,11 @@ public class Product extends BaseModel {
 
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    // If you keep cascade = CascadeType.ALL, then when you delete a product, it will also delete the category.
+    // and because Category model has cascade = CascadeType.ALL on products, it will delete all products in that category.
+    // so we should not use cascade = CascadeType.ALL here.
+    // @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Category category;
 
     private String description;
