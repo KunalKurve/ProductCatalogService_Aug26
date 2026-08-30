@@ -30,7 +30,7 @@ public class ProductController {
 //    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable Long productId) {
+    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId) {
 
         if(productId <= 0){
             //return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
@@ -97,16 +97,17 @@ public class ProductController {
         product.setId(productDto.getId());
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
-        product.setQuantity(product.getQuantity());
+        product.setQuantity(productDto.getQuantity());
         product.setPrice(productDto.getPrice());
         product.setImageUrl(productDto.getImageUrl());
         if (productDto.getCategory() != null) {
             CategoryDto categoryDto = productDto.getCategory();
-            Optional<Category> categoryOptional = categoryRepository.findByName(categoryDto.getName());
+            Optional<Category> categoryOptional = categoryRepository.findById(categoryDto.getId());
             if (categoryOptional.isPresent()) {
                 product.setCategory(categoryOptional.get());
             } else {
                 Category category = new Category();
+                category.setId(categoryDto.getId());
                 category.setName(categoryDto.getName());
                 category.setDescription(categoryDto.getDescription());
                 product.setCategory(category);

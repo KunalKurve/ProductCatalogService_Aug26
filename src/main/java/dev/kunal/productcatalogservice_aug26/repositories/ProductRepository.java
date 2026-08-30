@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findById(Long id);
@@ -18,7 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     void deleteById(Long id);
 
-    Page<Product> findProductByTitle(String query, Pageable pageable);
+    //If your Product entity doesn't have title, Spring cannot create the repository query.
+    // Page<Product> findProductByTitle(String query, Pageable pageable);
 
 
 

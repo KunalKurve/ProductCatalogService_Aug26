@@ -1,6 +1,9 @@
 package dev.kunal.productcatalogservice_aug26.services;
 
+import dev.kunal.productcatalogservice_aug26.exceptions.ProductAlreadyExistsException;
+import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
+import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import dev.kunal.productcatalogservice_aug26.repositories.ProductRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -14,9 +17,11 @@ import java.util.Optional;
 public class StorageProductService implements IProductService{
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public StorageProductService(ProductRepository productRepository) {
+    public StorageProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -32,8 +37,14 @@ public class StorageProductService implements IProductService{
 
         Optional<Product> existingProduct = productRepository.findById(product.getId());
         if(existingProduct.isPresent()){
-            throw new RuntimeException("Product with ID " + product.getId() + " already exists");
+            throw new ProductAlreadyExistsException("Product with ID " + product.getId() + " already exists");
         }
+        // if category is a new category, we need to save it first before saving the product
+        Optional<Category> existingCategory = categoryRepository.findById(product.getCategory().getId());
+        if (existingCategory.isEmpty()) {
+            categoryRepository.save(product.getCategory());
+        }
+
         return productRepository.save(product);
     }
 
@@ -47,6 +58,12 @@ public class StorageProductService implements IProductService{
 
         Product productToUpdate = existingProduct.get();
         productToUpdate.setId(product.getId());
+        productToUpdate.setPrice(product.getPrice());
+        productToUpdate.setQuantity(product.getQuantity());
+        productToUpdate.setImageUrl(product.getImageUrl());
+        productToUpdate.setCategory(product.getCategory());
+        productToUpdate.setName(product.getName());
+        productToUpdate.setDescription(product.getDescription());
         productToUpdate.setLastUpdatedAt(new Date());
         return productRepository.save(productToUpdate);
     }
@@ -61,12 +78,18 @@ public class StorageProductService implements IProductService{
 
         Product productToUpdate = existingProduct.get();
         productToUpdate.setId(product.getId());
+        productToUpdate.setPrice(product.getPrice());
+        productToUpdate.setQuantity(product.getQuantity());
+        productToUpdate.setImageUrl(product.getImageUrl());
+        productToUpdate.setCategory(product.getCategory());
+        productToUpdate.setName(product.getName());
+        productToUpdate.setDescription(product.getDescription());
         productToUpdate.setLastUpdatedAt(new Date());
         return productRepository.save(productToUpdate);
     }
 
     @Override
-    public void deleteProduct(Long id) {
+    public boolean deleteProduct(Long id) {
 
         Optional<Product> existingProduct = productRepository.findById(id);
         if(existingProduct.isEmpty()){
@@ -74,6 +97,7 @@ public class StorageProductService implements IProductService{
         }
 
         productRepository.deleteById(id);
+        return true;
     }
 
     @Override

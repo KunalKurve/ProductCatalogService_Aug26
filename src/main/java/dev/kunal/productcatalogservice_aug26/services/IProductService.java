@@ -19,7 +19,7 @@ public interface IProductService {
     Product updateProduct(Long id, Product product);
 
     //DELETE
-    void deleteProduct(Long id);
+    boolean deleteProduct(Long id);
 
     // GET all products
     List<Product> getAllProducts();
