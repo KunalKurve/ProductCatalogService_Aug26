@@ -95,9 +95,18 @@ public class StorageProductService implements IProductService{
         if(existingProduct.isEmpty()){
             throw new RuntimeException("Product with ID " + id + " does not exist");
         }
-
+        // how can I return false here?
+        if (existingProduct.get().getCategory() == null) {
+            return false;
+        }
         productRepository.deleteById(id);
         return true;
+
+        // how would controller know if row is deleted if we keep delete return type as void?
+        // return T/F
+        // throw exception and catch
+        // in try-catch
+        // database exception hi aayega, untill unless multithreading
     }
 
     @Override

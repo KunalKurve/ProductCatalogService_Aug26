@@ -88,7 +88,12 @@ public class ProductController {
     // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable(name = "id") Long productId){
-        productService.deleteProduct(productId);
+        // Delete the product and return a response
+        boolean isDeleted = productService.deleteProduct(productId);
+        if(!isDeleted){
+            return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            // If the product is not deleted, it means there was an error.
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
