@@ -7,7 +7,7 @@ import java.util.List;
 public interface IProductService {
 
     //GET
-    Product getProductById(Long id);
+    Product getProductDetailsById(Long id);
 
     //POST
     Product createProduct(Product product);

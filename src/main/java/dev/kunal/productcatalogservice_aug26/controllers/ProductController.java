@@ -30,14 +30,18 @@ public class ProductController {
 //    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId) {
+    public ResponseEntity<ProductDto> getProductDetailsById(@PathVariable("id") Long productId) {
 
-        if(productId <= 0){
+        if(productId == 0){
             //return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
             throw new IllegalArgumentException("Product ID must be greater than 0");
         }
+        else if (productId < 0) {
+            //return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException("Product ID must not be negative");
+        }
 
-        Product product = productService.getProductById(productId);
+        Product product = productService.getProductDetailsById(productId);
         if(product == null){
             //return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
             throw new RuntimeException("Product not found for ID: " + productId);
