@@ -3,6 +3,7 @@ package dev.kunal.productcatalogservice_aug26.repositories;
 import dev.kunal.productcatalogservice_aug26.models.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findById(Long id);
 
+    Optional<Product> findByName(String name);
+
     List<Product> findAll();
 
     Product save(Product product);
@@ -21,6 +24,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     //If your Product entity doesn't have title, Spring cannot create the repository query.
     // Page<Product> findProductByTitle(String query, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCase(String query, Pageable pageable);
+
+    Slice<Product> findByName(String query, Pageable pageable);
 
 
 

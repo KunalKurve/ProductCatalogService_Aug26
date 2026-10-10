@@ -1,5 +1,6 @@
 package dev.kunal.productcatalogservice_aug26.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,5 +22,6 @@ public class Category extends BaseModel {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Fetch(FetchMode.SUBSELECT)
+    @JsonBackReference
     private List<Product> products;
 }

@@ -1,5 +1,6 @@
 package dev.kunal.productcatalogservice_aug26.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -18,6 +19,7 @@ public class Product extends BaseModel {
     // so we should not use cascade = CascadeType.ALL here.
     // @ManyToOne(cascade = CascadeType.ALL)
     @ManyToOne
+    @JsonManagedReference
     private Category category;
 
     private String description;

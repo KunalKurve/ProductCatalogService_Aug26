@@ -35,16 +35,27 @@ public class StorageProductService implements IProductService{
     @Override
     public Product createProduct(Product product) {
 
-        Optional<Product> existingProduct = productRepository.findById(product.getId());
-        if(existingProduct.isPresent()){
-            throw new ProductAlreadyExistsException("Product with ID " + product.getId() + " already exists");
+        if(product.getId() != null) {
+            Optional<Product> existingProduct = productRepository.findById(product.getId());
+            if (existingProduct.isPresent()) {
+                throw new ProductAlreadyExistsException("Product with ID " + product.getId() + " already exists");
+            }
+            // if category is a new category, we need to save it first before saving the product
+            Optional<Category> existingCategory = categoryRepository.findById(product.getCategory().getId());
+            if (existingCategory.isEmpty()) {
+                categoryRepository.save(product.getCategory());
+            }
         }
-        // if category is a new category, we need to save it first before saving the product
-        Optional<Category> existingCategory = categoryRepository.findById(product.getCategory().getId());
-        if (existingCategory.isEmpty()) {
-            categoryRepository.save(product.getCategory());
+        if(product.getName() == null || product.getName().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty");
+        }
+        Optional<Product> existingProduct = productRepository.findByName(product.getName());
+        if (existingProduct.isPresent()) {
+            throw new ProductAlreadyExistsException("Product with name " + product.getName() + " already exists");
         }
 
+        // we are not auto-generating the ID, so we need to check if the ID is already present in the database
+        // so in Request Body, we are sending the ID
         return productRepository.save(product);
     }
 
