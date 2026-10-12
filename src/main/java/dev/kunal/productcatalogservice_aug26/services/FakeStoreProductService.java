@@ -33,6 +33,11 @@ public class FakeStoreProductService implements IProductService {
     private CategoryRepository categoryRepository;
 
     @Override
+    public Product getProductDetailsBasedOnUserRole(Long productId, Long userid) {
+        return null;
+    }
+
+    @Override
     public Product getProductDetailsById(Long id) {
 
         RestTemplate restTemplate = restTemplateBuilder.build();

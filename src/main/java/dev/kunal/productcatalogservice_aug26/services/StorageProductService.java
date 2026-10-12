@@ -1,12 +1,17 @@
 package dev.kunal.productcatalogservice_aug26.services;
 
+import dev.kunal.productcatalogservice_aug26.dtos.UserDto;
 import dev.kunal.productcatalogservice_aug26.exceptions.ProductAlreadyExistsException;
 import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
+import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import dev.kunal.productcatalogservice_aug26.repositories.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.List;
@@ -19,9 +24,40 @@ public class StorageProductService implements IProductService{
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+    // RestTemplateBuilder is not used in production apps
+
     public StorageProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+    }
+
+    @Override
+    public Product getProductDetailsBasedOnUserRole(Long productId, Long userid) {
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) return null;
+
+        if(productOptional.get().getScope().equals(Scope.PUBLIC)){
+            return productOptional.get();
+        }
+
+        // We are calling UserService using ServiceDiscovery (EurekaServer/Spring Cloud)
+        ResponseEntity<UserDto> response = restTemplate.getForEntity(
+                "http://userservice/users/{userId}",
+                UserDto.class,
+                userid
+        );
+
+        if(response.hasBody() && response.getBody() != null && response.getStatusCode().is2xxSuccessful()){
+            UserDto userDto = response.getBody();
+            if (userDto.getRoles().contains("ADMIN") || userDto.getRoles().contains("SELLER")){
+                return productOptional.get();
+            }
+        }
+
+        return null;
     }
 
     @Override

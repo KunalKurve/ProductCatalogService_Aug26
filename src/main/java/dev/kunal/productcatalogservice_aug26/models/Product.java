@@ -1,6 +1,7 @@
 package dev.kunal.productcatalogservice_aug26.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -31,5 +32,9 @@ public class Product extends BaseModel {
     private String imageUrl;
 
     private Boolean isSaleEligible; //This is why we require dto
+
+    // For ServiceDiscovery demo, adding a field for Admin to mark a product as private or public.
+    // Private products will not be visible to the public.
+    private Scope scope;
 
 }

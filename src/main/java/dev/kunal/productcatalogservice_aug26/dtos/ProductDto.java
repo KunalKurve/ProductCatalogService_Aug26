@@ -15,4 +15,5 @@ public class ProductDto {
     private Integer quantity;
     private CategoryDto category;
     private String imageUrl;
+    private String scope;
 }

@@ -7,6 +7,9 @@ import java.util.List;
 public interface IProductService {
 
     //GET
+    Product getProductDetailsBasedOnUserRole(Long productId, Long userid);
+
+    //GET
     Product getProductDetailsById(Long id);
 
     //POST

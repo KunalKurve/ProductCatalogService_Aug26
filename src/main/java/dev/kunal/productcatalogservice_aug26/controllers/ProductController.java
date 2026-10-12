@@ -5,6 +5,7 @@ import dev.kunal.productcatalogservice_aug26.dtos.FakeStoreProductDto;
 import dev.kunal.productcatalogservice_aug26.dtos.ProductDto;
 import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
+import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import dev.kunal.productcatalogservice_aug26.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,14 @@ public class ProductController {
 //    public ProductController(@Qualifier("storageProductService") IProductService productService) {
 //        this.productService = productService;
 //    }
+
+    @GetMapping("/{productId}/users/{userId}")
+    public ProductDto getProductDetailsBasedOnUserRole(@PathVariable Long productId, @PathVariable Long userId) {
+
+        Product product = productService.getProductDetailsBasedOnUserRole(productId, userId);
+        if(product == null) return null;
+        return mapProductToProductDto(product);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductDetailsById(@PathVariable("id") Long productId) {
@@ -122,6 +131,13 @@ public class ProductController {
                 product.setCategory(category);
             }
         }
+        if(productDto.getScope().equalsIgnoreCase("PRIVATE")){
+            product.setScope(Scope.PRIVATE);
+        }
+        else{
+            product.setScope(Scope.PUBLIC);
+        }
+
         return product;
     }
 
@@ -140,6 +156,14 @@ public class ProductController {
             categoryDto.setName(product.getCategory().getName());
             categoryDto.setDescription(product.getCategory().getDescription());
             productDto.setCategory(categoryDto);
+        }
+        if (product.getScope() != null) {
+            if(product.getScope().equals(Scope.PRIVATE)){
+                productDto.setScope("PRIVATE");
+            }
+            else{
+                productDto.setScope("PUBLIC");
+            }
         }
         return productDto;
     }
