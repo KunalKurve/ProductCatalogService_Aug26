@@ -8,6 +8,7 @@ import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import dev.kunal.productcatalogservice_aug26.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,14 +18,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Primary
+//@Primary
 @Service
 public class StorageProductService implements IProductService{
 
     private final ProductRepository productRepository;
+
     private final CategoryRepository categoryRepository;
 
     @Autowired
+    @Qualifier("loadBalancedRestTemplate")
     private RestTemplate restTemplate;
     // RestTemplateBuilder is not used in production apps
 

@@ -11,7 +11,12 @@ public class RestTemplateConfig {
     @Bean
     @LoadBalanced // this will ensure the requests are in Round Robin Manner to any service
     // line to achieve client-side load balancing
-    public RestTemplate getRestTemplate() {
+    public RestTemplate loadBalancedRestTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    public RestTemplate externalRestTemplate() {
         return new RestTemplate();
     }
 }

@@ -21,14 +21,14 @@ import java.util.Optional;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private IProductService productService;
+//    @Autowired
+    private final IProductService productService;
     @Autowired
     private CategoryRepository categoryRepository;
 
-//    public ProductController(@Qualifier("storageProductService") IProductService productService) {
-//        this.productService = productService;
-//    }
+    public ProductController(@Qualifier("fakeStoreProductService") IProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping("/{productId}/users/{userId}")
     public ProductDto getProductDetailsBasedOnUserRole(@PathVariable Long productId, @PathVariable Long userId) {

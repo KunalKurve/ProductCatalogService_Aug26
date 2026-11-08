@@ -1,12 +1,14 @@
 package dev.kunal.productcatalogservice_aug26.services;
 
+import dev.kunal.productcatalogservice_aug26.clients.FakeStoreAPIClient;
 import dev.kunal.productcatalogservice_aug26.dtos.FakeStoreProductDto;
 import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
 import dev.kunal.productcatalogservice_aug26.models.enums.State;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +25,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Primary
 public class FakeStoreProductService implements IProductService {
 
+    //@Autowired
+    //private RestTemplate restTemplate; in case only created config class
+    // private RestTemplateBuilder restTemplateBuilder; // use if not created Client class
     @Autowired
-    //private RestTemplate restTemplate; //How to create a bean - we will learn in future class
-    private RestTemplateBuilder restTemplateBuilder;
+    private FakeStoreAPIClient fakeStoreAPIClient;
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public Product getProductDetailsBasedOnUserRole(Long productId, Long userid) {
@@ -40,34 +48,52 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public Product getProductDetailsById(Long id) {
 
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        /* Redis Pseudocode
+        if found in redis:
+            return;
+        else
+            fetch from Fake Store and
+                save in Redis
+         */
 
-        ResponseEntity<FakeStoreProductDto> responseEntity =
-                restTemplate.getForEntity("https://fakestoreapi.com/products/{id}",
-                        FakeStoreProductDto.class,
-                        id
-                );
+        FakeStoreProductDto fakeStoreProductDto = null;
 
-        if (responseEntity.getBody() != null && responseEntity.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
-            return mapFakeStoreProductDtoToProduct(responseEntity.getBody());
+        fakeStoreProductDto = (FakeStoreProductDto) redisTemplate.opsForHash().get("PRODUCTS", id);
+
+        if (fakeStoreProductDto == null) {
+
+            ResponseEntity<FakeStoreProductDto> responseEntity =
+                    fakeStoreAPIClient.getProductDetailsById(id);
+
+            // Add to Redis
+            redisTemplate.opsForHash().put("PRODUCTS", id, responseEntity.getBody());
+
+            if (fakeStoreAPIClient.validateResponse(responseEntity)) {
+                System.out.println("Found by calling Fake Store");
+                return mapFakeStoreProductDtoToProduct(responseEntity.getBody());
+            }
         }
-            return null;
+        else {
+            System.out.println("Found in Redis cache");
+            return mapFakeStoreProductDtoToProduct(fakeStoreProductDto);
+        }
 
+        return null;
 
     }
 
     @Override
     public Product createProduct(Product product) {
 
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        // RestTemplate restTemplate = restTemplateBuilder.build();
 
         ResponseEntity<FakeStoreProductDto> responseEntity =
-                restTemplate.postForEntity("https://fakestoreapi.com/products",
+                fakeStoreAPIClient.postForEntity("https://fakestoreapi.com/products",
                         product,
                         FakeStoreProductDto.class
                 );
 
-        if (responseEntity.getBody() != null && responseEntity.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
+        if (fakeStoreAPIClient.validateResponse(responseEntity)) {
             return mapFakeStoreProductDtoToProduct(responseEntity.getBody());
         }
         return null;
@@ -76,7 +102,7 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public Product replaceProduct(Long id, Product product) {
 
-        ResponseEntity<FakeStoreProductDto> responseEntity = requestForEntity(
+        ResponseEntity<FakeStoreProductDto> responseEntity = fakeStoreAPIClient.requestForEntity(
                 "https://fakestoreapi.com/products/{id}",
                 HttpMethod.PUT,
                 product,
@@ -84,7 +110,7 @@ public class FakeStoreProductService implements IProductService {
                 id
         );
 
-        if (responseEntity.getBody() != null && responseEntity.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
+        if (fakeStoreAPIClient.validateResponse(responseEntity)) {
             return mapFakeStoreProductDtoToProduct(responseEntity.getBody());
         }
 
@@ -94,7 +120,7 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public Product updateProduct(Long id, Product product) {
 
-        ResponseEntity<FakeStoreProductDto> responseEntity = requestForEntity(
+        ResponseEntity<FakeStoreProductDto> responseEntity = fakeStoreAPIClient.requestForEntity(
                 "https://fakestoreapi.com/products/{id}",
                 HttpMethod.PATCH,
                 product,
@@ -102,7 +128,7 @@ public class FakeStoreProductService implements IProductService {
                 id
         );
 
-        if (responseEntity.getBody() != null && responseEntity.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
+        if (fakeStoreAPIClient.validateResponse(responseEntity)) {
             return mapFakeStoreProductDtoToProduct(responseEntity.getBody());
         }
 
@@ -112,8 +138,8 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public boolean deleteProduct(Long id) {
 
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        restTemplate.delete("https://fakestoreapi.com/products/{id}", id);
+        // RestTemplate restTemplate = restTemplateBuilder.build();
+        fakeStoreAPIClient.delete("https://fakestoreapi.com/products/{id}", id);
 
         return true;
     }
@@ -121,10 +147,12 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public List<Product> getAllProducts() {
 
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        // RestTemplate restTemplate = restTemplateBuilder.build();
 
         ResponseEntity<FakeStoreProductDto[]> responseEntity =
-                restTemplate.getForEntity("https://fakestoreapi.com/products",
+                fakeStoreAPIClient.requestForEntity("https://fakestoreapi.com/products",
+                        HttpMethod.GET,
+                        null,
                         FakeStoreProductDto[].class
                 );
 
@@ -136,14 +164,6 @@ public class FakeStoreProductService implements IProductService {
         return products;
     }
 
-    public <T> ResponseEntity<T> requestForEntity(String url, HttpMethod httpMethod, @Nullable Object request,
-                                               Class<T> responseType, Object... uriVariables) throws RestClientException {
-
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
-        ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);
-        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
-    }
 
     public Product mapFakeStoreProductDtoToProduct (FakeStoreProductDto fakeStoreProductDto){
 
@@ -161,7 +181,9 @@ public class FakeStoreProductService implements IProductService {
         }
         else {
             // If category does not exist
+            Long id = 0L;
             Category category = new Category();
+            category.setId(++id);
             category.setName(fakeStoreProductDto.getTitle());
             category.setDescription(fakeStoreProductDto.getDescription());
             category.setState(State.ACTIVE);
