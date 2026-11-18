@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequestMapping("/products")
 public class ProductController {
 
-//    @Autowired
+    @Autowired
     private final IProductService productService;
     @Autowired
     private CategoryRepository categoryRepository;

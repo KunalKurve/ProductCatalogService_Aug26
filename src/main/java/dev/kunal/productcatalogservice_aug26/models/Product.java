@@ -3,6 +3,7 @@ package dev.kunal.productcatalogservice_aug26.models;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class Product extends BaseModel {
     @JsonManagedReference
     private Category category;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Double price;

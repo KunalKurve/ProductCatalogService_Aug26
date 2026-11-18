@@ -1,10 +1,7 @@
 package dev.kunal.productcatalogservice_aug26.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Fetch;
@@ -18,9 +15,11 @@ import java.util.List;
 public class Category extends BaseModel {
 
     private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)
     @JsonBackReference
     private List<Product> products;

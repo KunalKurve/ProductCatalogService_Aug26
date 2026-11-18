@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Primary
+//@Primary
 public class FakeStoreProductService implements IProductService {
 
     //@Autowired
