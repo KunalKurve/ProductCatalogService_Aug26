@@ -6,6 +6,7 @@ import dev.kunal.productcatalogservice_aug26.models.Category;
 import dev.kunal.productcatalogservice_aug26.models.Product;
 import dev.kunal.productcatalogservice_aug26.models.enums.Scope;
 import dev.kunal.productcatalogservice_aug26.repositories.CategoryRepository;
+import dev.kunal.productcatalogservice_aug26.repositories.OpenSearchProductRepository;
 import dev.kunal.productcatalogservice_aug26.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +25,8 @@ public class StorageProductService implements IProductService{
 
     private final ProductRepository productRepository;
 
+    private final OpenSearchProductRepository openSearchProductRepository;
+
     private final CategoryRepository categoryRepository;
 
     @Autowired
@@ -31,9 +34,13 @@ public class StorageProductService implements IProductService{
     private RestTemplate restTemplate;
     // RestTemplateBuilder is not used in production apps
 
-    public StorageProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public StorageProductService(ProductRepository productRepository,
+                                 CategoryRepository categoryRepository,
+                                 OpenSearchProductRepository openSearchProductRepository
+    ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.openSearchProductRepository = openSearchProductRepository;
     }
 
     @Override
@@ -93,9 +100,14 @@ public class StorageProductService implements IProductService{
             throw new ProductAlreadyExistsException("Product with name " + product.getName() + " already exists");
         }
 
+        // SAVING INTO MySQL DB
+        Product savedProduct = productRepository.save(product);
         // we are not auto-generating the ID, so we need to check if the ID is already present in the database
         // so in Request Body, we are sending the ID
-        return productRepository.save(product);
+
+        // saving into Elasticsearch DB
+        openSearchProductRepository.save(savedProduct);
+        return savedProduct;
     }
 
     @Override

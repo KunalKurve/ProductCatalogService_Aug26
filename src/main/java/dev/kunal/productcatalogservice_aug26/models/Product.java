@@ -8,10 +8,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 @Getter
 @Setter
 @Entity
+@Document(indexName = "products")
 public class Product extends BaseModel {
 
     private String name;

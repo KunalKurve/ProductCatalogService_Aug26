@@ -2,6 +2,7 @@ package dev.kunal.productcatalogservice_aug26.services;
 
 import dev.kunal.productcatalogservice_aug26.dtos.SortParams;
 import dev.kunal.productcatalogservice_aug26.models.Product;
+import dev.kunal.productcatalogservice_aug26.repositories.OpenSearchProductRepository;
 import dev.kunal.productcatalogservice_aug26.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -13,8 +14,15 @@ import java.util.List;
 @Service
 public class SearchService implements ISearchService{
 
+//    @Autowired
+//    private ProductRepository productRepository;
+
     @Autowired
-    private ProductRepository productRepository;
+    private OpenSearchProductRepository productRepository;
+
+     public SearchService(OpenSearchProductRepository productRepository){
+         this.productRepository = productRepository;
+     }
 
 
     @Override

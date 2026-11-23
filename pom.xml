@@ -90,6 +90,19 @@
             <version>1.11.0</version>
         </dependency>
 
+        <!-- Source: https://mvnrepository.com/artifact/org.opensearch.client/spring-data-opensearch-starter -->
+        <dependency>
+            <groupId>org.opensearch.client</groupId>
+            <artifactId>spring-data-opensearch-starter</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.opensearch.client/spring-data-opensearch -->
+        <dependency>
+            <groupId>org.opensearch.client</groupId>
+            <artifactId>spring-data-opensearch</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
